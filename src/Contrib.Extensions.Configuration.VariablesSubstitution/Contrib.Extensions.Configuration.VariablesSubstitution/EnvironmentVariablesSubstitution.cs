@@ -6,7 +6,12 @@ namespace Contrib.Extensions.Configuration.VariablesSubstitution
     {
         public string Substitute(string value)
         {
-            throw new NotImplementedException();
+            if (value == null)
+            {
+                return null;
+            }
+
+            return Environment.ExpandEnvironmentVariables(value);
         }
     }
 }
