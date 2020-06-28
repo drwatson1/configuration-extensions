@@ -21,20 +21,26 @@ namespace Contrib.Extensions.Configuration.VariablesSubstitution
 
             var props = option.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 
-            var propsForUpdate = props.Where(x => x.CanRead && x.CanWrite && x.PropertyType == typeof(string));
+            var propsForUpdate = props.Where(x => x.CanRead && x.CanWrite);
 
             foreach (var p in propsForUpdate)
             {
                 var setMethod = p.SetMethod;
-                if( !setMethod.IsPublic )
+                if (!setMethod.IsPublic)
                 {
                     continue;
                 }
 
-                var value = p.GetValue(option) as string;
-                if (value != null)
+                if (p.GetValue(option) is string value)
                 {
-                    p.SetValue(option, Substitution.Substitute(value));
+                    if( value != null )
+                    {
+                        p.SetValue(option, Substitution.Substitute(value));
+                    }
+                }
+                else if (p.GetValue(option) is object nesteOption)
+                {
+                    Configure(nesteOption);
                 }
             }
         }

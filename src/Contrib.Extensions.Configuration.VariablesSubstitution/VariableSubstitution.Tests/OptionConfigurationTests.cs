@@ -20,7 +20,6 @@ namespace VariableSubstitution.Tests
             public string ReadOnlyValue { get; } = "Read-only value";
         }
 
-
         class OptionWithNonPublicSetter
         {
             public OptionWithNonPublicSetter(string value)
@@ -31,6 +30,15 @@ namespace VariableSubstitution.Tests
             public string Value { get; private set;  } = "Private setter value";
         }
 
+        class OptionWithNestedOptions
+        {
+            public class NestedOptions
+            {
+                public string Value { get; set; }
+            }
+
+            public NestedOptions Nested { get; set; }
+        }
 
         IVariablesSubstitution<string> CreateSubst(string value)
         {
@@ -85,7 +93,7 @@ namespace VariableSubstitution.Tests
         }
 
         [Fact]
-        public void Configure_WhenCalled_ShouldNotSubstitutePropertiesWithNonPublicSetters()
+        public void Configure_WhenOptioNonPublicSettersProperty_ShouldNotSubstituteValue()
         {
             var substitutedValue = "SubstitutedValue";
             var conf = CreateConfigurator(CreateSubst(substitutedValue));
@@ -98,7 +106,7 @@ namespace VariableSubstitution.Tests
         }
 
         [Fact]
-        public void Configure_WhenCalled_ShouldSubstituteValueOfPublicReadWriteProperty()
+        public void Configure_WhenOptionHasPublicReadWriteProperty_ShouldSubstituteValue()
         {
             var substitutedValue = "SubstitutedValue";
             var conf = CreateConfigurator(CreateSubst(substitutedValue));
@@ -109,6 +117,20 @@ namespace VariableSubstitution.Tests
             conf.Configure(option);
 
             option.Value1.Should().Be(substitutedValue);
+        }
+
+        [Fact]
+        public void Configure_WhenOptionHasNestedOption_ShouldSubstituteNestedValue()
+        {
+            var substitutedValue = "SubstitutedValue";
+            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+
+            var originalValue = "OriginalValue";
+            var option = new OptionWithNestedOptions() { Nested  = new OptionWithNestedOptions.NestedOptions() { Value = originalValue }  };
+
+            conf.Configure(option);
+
+            option.Nested.Value.Should().Be(substitutedValue);
         }
     }
 }
