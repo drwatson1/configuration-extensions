@@ -31,6 +31,15 @@ namespace VariableSubstitution.Tests
             public string Value { get; private set;  } = "Private setter value";
         }
 
+
+        IVariablesSubstitution<string> CreateSubst(string value)
+        {
+            var subst = A.Fake<IVariablesSubstitution<string>>();
+            A.CallTo(() => subst.Substitute(A<string>.Ignored)).Returns(value);
+
+            return subst;
+        }
+
         IOptionConfigurator CreateConfigurator(IVariablesSubstitution<string> subst = null)
         {
             if (subst == null)
@@ -76,12 +85,10 @@ namespace VariableSubstitution.Tests
         }
 
         [Fact]
-        public void Configure_WhenCalled_ShouldNotChangePropertiesWithNonPublicSetters()
+        public void Configure_WhenCalled_ShouldNotSubstitutePropertiesWithNonPublicSetters()
         {
             var substitutedValue = "SubstitutedValue";
-            var subst = A.Fake<IVariablesSubstitution<string>>();
-            A.CallTo(() => subst.Substitute(A<string>.Ignored)).Returns(substitutedValue);
-            var conf = CreateConfigurator(subst);
+            var conf = CreateConfigurator(CreateSubst(substitutedValue));
 
             var originalValue = "OriginalValue";
             var option = new OptionWithNonPublicSetter(originalValue);
@@ -91,13 +98,10 @@ namespace VariableSubstitution.Tests
         }
 
         [Fact]
-        public void Configure_WhenCalled_ShouldSubstituteValue()
+        public void Configure_WhenCalled_ShouldSubstituteValueOfPublicReadWriteProperty()
         {
             var substitutedValue = "SubstitutedValue";
-            var subst = A.Fake<IVariablesSubstitution<string>>();
-            A.CallTo(() => subst.Substitute(A<string>.Ignored)).Returns(substitutedValue);
-
-            var conf = CreateConfigurator(subst);
+            var conf = CreateConfigurator(CreateSubst(substitutedValue));
 
             var originalValue = "OriginalValue";
             var option = new SimpleOption() { Value1 = originalValue };
