@@ -5,13 +5,8 @@ namespace Contrib.Extensions.Configuration.VariablesSubstitution
     internal class EnvironmentVariablesSubstitution : IVariablesSubstitution<string>
     {
         public string Substitute(string value)
-        {
-            if (value == null)
-            {
-                return null;
-            }
-
-            return Environment.ExpandEnvironmentVariables(value);
-        }
+            => value == null
+                ? null
+                : Environment.ExpandEnvironmentVariables(value);
     }
 }
