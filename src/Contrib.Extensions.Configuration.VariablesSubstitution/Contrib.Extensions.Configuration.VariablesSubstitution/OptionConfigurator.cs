@@ -37,9 +37,9 @@ namespace Contrib.Extensions.Configuration.VariablesSubstitution
                         p.SetValue(option, Substitution.Substitute(value));
                     }
                 }
-                else if (p.GetValue(option) is object nesteOption)
+                else if (p.GetValue(option) is object nestedOption)
                 {
-                    Configure(nesteOption);
+                    Configure(nestedOption);
                 }
             }
         }
