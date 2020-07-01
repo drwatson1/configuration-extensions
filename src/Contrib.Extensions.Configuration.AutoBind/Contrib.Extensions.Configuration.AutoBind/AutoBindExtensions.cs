@@ -10,7 +10,19 @@ namespace Contrib.Extensions.Configuration
 {
     public static class AutoBindExtensions
     {
-        public static OptionsBuilder<TOption> AutoBind<TOption>(this OptionsBuilder<TOption> builder, IConfiguration configuration) where TOption : class
-            => builder.Bind(configuration.GetSection(new SectionNameResolver<TOption>().Resolve()));
+        static IConfiguration Configuration;
+
+        public static OptionsBuilder<TOption> AutoBind<TOption>(this OptionsBuilder<TOption> builder) where TOption : class
+        {
+            if( Configuration == null)
+            {
+                var provider = builder.Services.BuildServiceProvider();
+                Configuration = provider.GetService<IConfiguration>();
+            }
+
+            builder.Bind(Configuration.GetSection(new SectionNameResolver<TOption>().Resolve()));
+
+            return builder;
+        }
     }
 }
