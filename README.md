@@ -31,7 +31,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-You can customize the section name by adding a class-level read-only property or field to the class with a name 'SectionName' as follow:
+You can customize the section name by adding a class-level read-only property or field to the class with the name 'SectionName' as follow:
 
 ```csharp
 public class MyServerOptions
@@ -53,7 +53,7 @@ If the class contains one of these fields or properties, AutoBind uses it. If no
 
 The package allows you to expand environment variables in configuration files.
 
-The basic usage is like following:
+### Basic usage
 
 Install the package:
 
@@ -61,7 +61,7 @@ Install the package:
 Install-Package Contrib.Extensions.Configuration.VariablesSubstitution
 ```
 
-Define configuration option class:
+Define a configuration option class:
 
 ```csharp
 public class MyServerOptions
@@ -81,7 +81,7 @@ services.AddOptions<MyServerOptions>
     .SubstituteVariables(); // This call makes it happen
 ```
 
-Now you can add a configuration section and use environment variables in options:
+Now you can add a configuration section and use environment variables in your `appsettings.json`:
 
 ```json
 {
@@ -94,7 +94,7 @@ Now you can add a configuration section and use environment variables in options
 
 But what if you do want to use `$TEMP` or `$(TEMP)` instead of `%TEMP%`, or maybe don't want to use environment variables?
 
-You can do it by two steps:
+You can do it with two steps:
 
 1. Implement the interface: 
 
