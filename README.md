@@ -92,6 +92,8 @@ Now you can add a configuration section and use environment variables in your `a
 }
 ```
 
+### Customization
+
 But what if you do want to use `$TEMP` or `$(TEMP)` instead of `%TEMP%`, or maybe don't want to use environment variables?
 
 You can do it with two steps:
