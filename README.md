@@ -1,6 +1,7 @@
 # Configuration Extensions
 
 The project contains two utilities to solve some general problems.
+These are not a silver bullet and don't solve all your problems, but do your coding a little bit easier.
 
 ## AutoBind
 
@@ -45,3 +46,77 @@ public class MyServerOptions
 ```
 
 If the class contains one of these fields or properties, AutoBind uses it. If not,  it uses the class name.
+
+## VariablesSubstitution
+
+[![NuGet](https://img.shields.io/nuget/v/Contrib.Extensions.Configuration.VariablesSubstitution.svg)](https://www.nuget.org/packages/Contrib.Extensions.Configuration.VariablesSubstitution)
+
+The package allows you to expand environment variables in configuration files.
+
+The basic usage is like following:
+
+Install the package:
+
+```
+Install-Package Contrib.Extensions.Configuration.VariablesSubstitution
+```
+
+Define configuration option class:
+
+```csharp
+public class MyServerOptions
+{
+    public string TempFolder { get; set; }
+    public string DataFiles { get; set; }
+    // other options
+    // ...
+}
+```
+
+Bind the class to a configuration file section and configure it:
+
+```csharp
+services.AddOptions<MyServerOptions>
+    .AutoBind()
+    .SubstituteVariables(); // This call makes it happen
+```
+
+Now you can add a configuration section and use environment variables in options:
+
+```json
+{
+    "MyServerOptions": {
+        "TempFolder": "%TEMP%/MyApp",
+        "DataFiles": "%AppData%/MyApp/DataFiles"
+    }
+}
+```
+
+But what if you do want to use `$TEMP` or `$(TEMP)` instead of `%TEMP%`, or maybe don't want to use environment variables?
+
+You can do it by two steps:
+
+1. Implement the interface: 
+
+```csharp
+namespace Contrib.Extensions.Configuration.VariablesSubstitution
+{
+    public interface IVariablesSubstitution<T>
+    {
+        T Substitute(T value);
+    }
+}
+```
+
+2. Register the implementation in the DI-container BEFORE any call of SubstituteVariables:
+
+```csharp
+// Register your implementation
+services.AddSingleton<IVariablesSubstitution<string>, YourImplementation>();
+
+services.AddOptions<MyServerOptions>
+    .AutoBind()
+    .SubstituteVariables();
+```
+
+Have fun!
