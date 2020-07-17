@@ -112,7 +112,7 @@ public class MyServerOptions
 {
     "MyServerOptions": {
         "TempFolder": "%TEMP%/MyApp",
-        "DataFiles": "%AppData%/MyApp/DataFiles"
+        "DataFiles": "%AppData%/MyApp/DataFiles",
         "SubOptions": {
             "Proxy": "%PROXY_ADDRESS%"
         }
