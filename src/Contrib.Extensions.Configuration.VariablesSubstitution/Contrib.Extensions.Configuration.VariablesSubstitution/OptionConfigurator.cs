@@ -22,6 +22,12 @@ namespace Contrib.Extensions.Configuration.VariablesSubstitution
                 return;
             }
 
+            if (option is IList listValue)
+            {
+                UpdateList(listValue);
+                return;
+            }
+
             var props = option.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 
             var propsForUpdate = props.Where(x => x.CanRead && x.CanWrite);
@@ -42,10 +48,6 @@ namespace Contrib.Extensions.Configuration.VariablesSubstitution
                     }
 
                     UpdateStringValue(option, p, stringValue);
-                }
-                else if (val is IList listValue)
-                {
-                    UpdateList(listValue);
                 }
                 else if (val is object nestedOption)
                 {
