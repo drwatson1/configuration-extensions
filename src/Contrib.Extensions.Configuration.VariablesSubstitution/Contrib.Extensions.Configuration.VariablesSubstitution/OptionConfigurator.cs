@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Reflection;
 
 namespace Contrib.Extensions.Configuration.VariablesSubstitution
 {
@@ -24,23 +26,33 @@ namespace Contrib.Extensions.Configuration.VariablesSubstitution
 
             foreach (var p in propsForUpdate)
             {
-                var setMethod = p.SetMethod;
-                if (!setMethod.IsPublic)
+                var val = p.GetValue(option);
+                if( val == null )
                 {
                     continue;
                 }
-
-                if (p.GetValue(option) is string value)
+                if (val is string stringValue)
                 {
-                    if( value != null )
+                    var setMethod = p.SetMethod;
+                    if (!setMethod.IsPublic)
                     {
-                        p.SetValue(option, Substitution.Substitute(value));
+                        continue;
                     }
+
+                    UpdateStringValue(option, p, stringValue);
                 }
-                else if (p.GetValue(option) is object nestedOption)
+                else if (val is object nestedOption)
                 {
                     Configure(nestedOption);
                 }
+            }
+        }
+
+        private void UpdateStringValue<TOption>(TOption option, PropertyInfo p, string stringValue) where TOption : class
+        {
+            if (stringValue != null)
+            {
+                p.SetValue(option, Substitution.Substitute(stringValue));
             }
         }
     }
