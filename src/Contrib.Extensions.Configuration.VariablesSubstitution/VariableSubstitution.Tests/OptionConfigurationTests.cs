@@ -3,6 +3,8 @@ using Xunit;
 using Contrib.Extensions.Configuration.VariablesSubstitution;
 using FluentAssertions;
 using FakeItEasy;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace VariableSubstitution.Tests
 {
@@ -13,6 +15,16 @@ namespace VariableSubstitution.Tests
             public string Value1 { get; set; }
             public string Value2 { get; set; }
             public string ReadOnlyValue { get; } = "Read-only value";
+        }
+
+        class StringArrayOption
+        {
+            public string[] Value { get; set; }
+        }
+
+        class ReadOnlyStringListOption
+        {
+            public IReadOnlyList<string> Value { get; set; } = new ReadOnlyCollection<string>(new string[] { "val1", "val2" });
         }
 
         class OptionWithReadOnlyValue
@@ -131,6 +143,53 @@ namespace VariableSubstitution.Tests
             conf.Configure(option);
 
             option.Nested.Value.Should().Be(substitutedValue);
+        }
+
+        [Fact]
+        public void Configure_WhenOptionHasStringArrayProperty_ShouldSubstituteAllValues()
+        {
+            var substitutedValue = "SubstitutedValue";
+            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+
+            var originalValue1 = "OriginalValue1";
+            var originalValue2 = "OriginalValue2";
+            var option = new StringArrayOption() { Value = new[] { originalValue1, originalValue2 } };
+
+            conf.Configure(option);
+
+            option.Value[0].Should().Be(substitutedValue);
+            option.Value[1].Should().Be(substitutedValue);
+        }
+
+        [Fact]
+        public void Configure_WhenOptionHasReadOblyStringListProperty_ShouldNotSubstituteValues()
+        {
+            var substitutedValue = "SubstitutedValue";
+            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+
+            var option = new ReadOnlyStringListOption();
+
+            conf.Configure(option);
+
+            option.Value[0].Should().NotBe(substitutedValue);
+            option.Value[1].Should().NotBe(substitutedValue);
+        }
+
+        [Fact]
+        public void Configure_WhenStringArrayPropertyHasNullValue_ShouldSubstituteAllNoneNullValues()
+        {
+            var substitutedValue = "SubstitutedValue";
+            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+
+            var originalValue1 = "OriginalValue1";
+            var originalValue2 = "OriginalValue2";
+            var option = new StringArrayOption() { Value = new[] { originalValue1, null, originalValue2 } };
+
+            conf.Configure(option);
+
+            option.Value[0].Should().Be(substitutedValue);
+            option.Value[1].Should().BeNull();
+            option.Value[2].Should().Be(substitutedValue);
         }
     }
 }

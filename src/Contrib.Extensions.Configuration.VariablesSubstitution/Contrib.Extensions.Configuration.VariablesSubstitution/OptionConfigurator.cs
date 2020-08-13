@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -41,9 +43,35 @@ namespace Contrib.Extensions.Configuration.VariablesSubstitution
 
                     UpdateStringValue(option, p, stringValue);
                 }
+                else if (val is IList listValue)
+                {
+                    UpdateList(listValue);
+                }
                 else if (val is object nestedOption)
                 {
                     Configure(nestedOption);
+                }
+            }
+        }
+
+        private void UpdateList(IList list)
+        {
+            if( list.IsReadOnly )
+            {
+                return;
+            }
+
+            if ( list.GetType().GetElementType() == typeof(string) )
+            {
+                var stringList = list as IList<string>;
+                for (int i = 0; i < stringList.Count; ++i)
+                {
+                    if(stringList[i] == null)
+                    {
+                        continue;
+                    }
+
+                    stringList[i] = Substitution.Substitute(stringList[i]);
                 }
             }
         }
