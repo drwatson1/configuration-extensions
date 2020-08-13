@@ -92,7 +92,7 @@ Now you can add a configuration section and use environment variables in your `a
 }
 ```
 
-The substitution works for all of nested options as well. So, this will work too:
+The substitution works for all nested options including any types of mutable lists. So, this will work too:
 
 ```csharp
 public class MyServerOptions
@@ -104,7 +104,9 @@ public class MyServerOptions
 
     public string TempFolder { get; set; }
     public string DataFiles { get; set; }
+    public string[] StringList { get; set; }
     public SubOptions SubOptions { get; set; }
+    public List<SubOptions> SubOptionsList { get; set; }
 }
 ```
 
@@ -113,9 +115,21 @@ public class MyServerOptions
     "MyServerOptions": {
         "TempFolder": "%TEMP%/MyApp",
         "DataFiles": "%AppData%/MyApp/DataFiles",
+        "StringList": [
+            "value1",
+            "%USER%"
+        ],
         "SubOptions": {
             "Proxy": "%PROXY_ADDRESS%"
-        }
+        },
+        "SubOptionsList": [
+            {
+                "Proxy": "%PROXY_ADDRESS%",
+            },
+            {
+                "Proxy": "%PROXY_ADDRESS%",
+            }
+        ]
     }
 }
 ```
@@ -150,3 +164,10 @@ services.AddOptions<MyServerOptions>
 ```
 
 Have fun!
+
+# Versions
+
+| Date | Version | Description |
+|-|-|-|
+| 2020-08-13 | 1.1.0 | Support lists of nested options and strings
+| 2020-07-17 | 1.0.0 | Initial release
