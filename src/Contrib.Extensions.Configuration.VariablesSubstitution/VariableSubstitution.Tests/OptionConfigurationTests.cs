@@ -27,6 +27,11 @@ namespace VariableSubstitution.Tests
             public IReadOnlyList<string> Value { get; set; } = new ReadOnlyCollection<string>(new string[] { "val1", "val2" });
         }
 
+        class NetstedOptionsListOption
+        {
+            public IList<SimpleOption> Value { get; set; }
+        }
+
         class OptionWithReadOnlyValue
         {
             public string ReadOnlyValue { get; } = "Read-only value";
@@ -190,6 +195,20 @@ namespace VariableSubstitution.Tests
             option.Value[0].Should().Be(substitutedValue);
             option.Value[1].Should().BeNull();
             option.Value[2].Should().Be(substitutedValue);
+        }
+
+        [Fact]
+        public void Configure_WhenOptionsHasNestedOptionsArrayProperty_ShouldSubstituteAllValuesInTheNestedOptions()
+        {
+            var substitutedValue = "SubstitutedValue";
+            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+
+            var originalValue = "OriginalValue1";
+            var option = new NetstedOptionsListOption() { Value = new[] { new SimpleOption() { Value1 = originalValue } } };
+
+            conf.Configure(option);
+
+            option.Value[0].Value1.Should().Be(substitutedValue);
         }
     }
 }

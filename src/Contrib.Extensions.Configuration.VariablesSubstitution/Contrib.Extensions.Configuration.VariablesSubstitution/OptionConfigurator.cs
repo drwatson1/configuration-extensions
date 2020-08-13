@@ -74,6 +74,13 @@ namespace Contrib.Extensions.Configuration.VariablesSubstitution
                     stringList[i] = Substitution.Substitute(stringList[i]);
                 }
             }
+            else if( !list.GetType().GetElementType().IsValueType )
+            {
+                foreach(var nestedOption in list)
+                {
+                    Configure(nestedOption);
+                }
+            }
         }
 
         private void UpdateStringValue<TOption>(TOption option, PropertyInfo p, string stringValue) where TOption : class
