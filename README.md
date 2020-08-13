@@ -7,7 +7,7 @@ These are not a silver bullet and don't solve all your problems, but do your cod
 
 [![NuGet](https://img.shields.io/nuget/v/Contrib.Extensions.Configuration.AutoBind.svg)](https://www.nuget.org/packages/Contrib.Extensions.Configuration.AutoBind)
 
-The package contains helpers to make your code a bit less verbose when you add another configuration option class to your system. 
+The package contains helpers to make your code a bit less verbose when you add a new configuration option class to your system. 
 
 Install the package:
 
@@ -88,6 +88,34 @@ Now you can add a configuration section and use environment variables in your `a
     "MyServerOptions": {
         "TempFolder": "%TEMP%/MyApp",
         "DataFiles": "%AppData%/MyApp/DataFiles"
+    }
+}
+```
+
+The substitution works for all of nested options as well. So, this will work too:
+
+```csharp
+public class MyServerOptions
+{
+    public class SubOptions
+    {
+        public string Proxy { get; set; }
+    }
+
+    public string TempFolder { get; set; }
+    public string DataFiles { get; set; }
+    public SubOptions SubOptions { get; set; }
+}
+```
+
+```json
+{
+    "MyServerOptions": {
+        "TempFolder": "%TEMP%/MyApp",
+        "DataFiles": "%AppData%/MyApp/DataFiles",
+        "SubOptions": {
+            "Proxy": "%PROXY_ADDRESS%"
+        }
     }
 }
 ```
