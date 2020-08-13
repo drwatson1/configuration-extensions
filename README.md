@@ -163,11 +163,12 @@ services.AddOptions<MyServerOptions>
     .SubstituteVariables();
 ```
 
-Have fun!
-
-# Versions
+## Versions
 
 | Date | Version | Description |
 |-|-|-|
 | 2020-08-13 | 1.1.0 | Support lists of nested options and strings
 | 2020-07-17 | 1.0.0 | Initial release
+
+
+Have fun!
