@@ -134,6 +134,8 @@ public class MyServerOptions
 }
 ```
 
+Note: dictionaries are not supported yet, see #2
+
 ### Customization
 
 But what if you do want to use `$TEMP` or `$(TEMP)` instead of `%TEMP%`, or maybe don't want to use environment variables?
