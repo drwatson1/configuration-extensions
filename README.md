@@ -27,7 +27,7 @@ public class MyServerOptions
 public void ConfigureServices(IServiceCollection services)
 {
     // This call bind the MyServerOptions class to the configuration file section with the 'MyServerOptions' name
-    services.AddOptions<MyServerOptions>.AutoBind();
+    services.AddOptions<MyServerOptions>().AutoBind();
 }
 ```
 
@@ -76,7 +76,7 @@ public class MyServerOptions
 Bind the class to a configuration file section and configure it:
 
 ```csharp
-services.AddOptions<MyServerOptions>
+services.AddOptions<MyServerOptions>()
     .AutoBind()
     .SubstituteVariables(); // This call makes it happen
 ```
@@ -158,7 +158,7 @@ namespace Contrib.Extensions.Configuration.VariablesSubstitution
 // Register your implementation
 services.AddSingleton<IVariablesSubstitution<string>, YourImplementation>();
 
-services.AddOptions<MyServerOptions>
+services.AddOptions<MyServerOptions>()
     .AutoBind()
     .SubstituteVariables();
 ```
