@@ -134,7 +134,7 @@ public class MyServerOptions
 }
 ```
 
-Note: dictionaries are not supported yet, see #2
+Note: dictionaries are not supported yet, see [Issue #2](https://github.com/drwatson1/configuration-extensions/issues/2).
 
 ### Customization
 
