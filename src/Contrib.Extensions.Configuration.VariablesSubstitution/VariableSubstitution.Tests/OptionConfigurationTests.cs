@@ -8,207 +8,295 @@ using System.Collections.ObjectModel;
 
 namespace VariableSubstitution.Tests
 {
-    public class OptionConfigurationTests
-    {
-        class SimpleOption
-        {
-            public string Value1 { get; set; }
-            public string Value2 { get; set; }
-            public string ReadOnlyValue { get; } = "Read-only value";
-        }
+	public class OptionConfigurationTests
+	{
+		class SimpleOption
+		{
+			public string Value1 { get; set; }
+			public string Value2 { get; set; }
+			public string ReadOnlyValue { get; } = "Read-only value";
+		}
 
-        class StringArrayOption
-        {
-            public string[] Value { get; set; }
-        }
+		class StringArrayOption
+		{
+			public string[] Value { get; set; }
+		}
 
-        class ReadOnlyStringListOption
-        {
-            public IReadOnlyList<string> Value { get; set; } = new ReadOnlyCollection<string>(new string[] { "val1", "val2" });
-        }
+		class ReadOnlyStringListOption
+		{
+			public IReadOnlyList<string> Value { get; set; } = new ReadOnlyCollection<string>(new string[] { "val1", "val2" });
+		}
 
-        class NetstedOptionsListOption
-        {
-            public IList<SimpleOption> Value { get; set; }
-        }
+		class NetstedOptionsListOption
+		{
+			public IList<SimpleOption> Value { get; set; }
+		}
 
-        class OptionWithReadOnlyValue
-        {
-            public string ReadOnlyValue { get; } = "Read-only value";
-        }
+		class OptionWithReadOnlyValue
+		{
+			public string ReadOnlyValue { get; } = "Read-only value";
+		}
 
-        class OptionWithNonPublicSetter
-        {
-            public OptionWithNonPublicSetter(string value)
-            {
-                Value = value;
-            }
+		class OptionWithNonPublicSetter
+		{
+			public OptionWithNonPublicSetter(string value)
+			{
+				Value = value;
+			}
 
-            public string Value { get; private set;  } = "Private setter value";
-        }
+			public string Value { get; private set; } = "Private setter value";
+		}
 
-        class OptionWithNestedOptions
-        {
-            public class NestedOptions
-            {
-                public string Value { get; set; }
-            }
+		class OptionWithNestedOptions
+		{
+			public class NestedOptions
+			{
+				public string Value { get; set; }
+			}
 
-            public NestedOptions Nested { get; set; }
-        }
+			public NestedOptions Nested { get; set; }
+		}
 
-        IVariablesSubstitution<string> CreateSubst(string value)
-        {
-            var subst = A.Fake<IVariablesSubstitution<string>>();
-            A.CallTo(() => subst.Substitute(A<string>.Ignored)).Returns(value);
+		class OptionWithDictionary
+		{
+			public Dictionary<string, string> Value { get; set; }
+		}
 
-            return subst;
-        }
+		class OptionWithDictionaryOfObjects
+		{
+			public class ObjectWithString
+			{
+				public ObjectWithString(string value)
+				{
+					Value = value;
+				}
 
-        IOptionConfigurator CreateConfigurator(IVariablesSubstitution<string> subst = null)
-        {
-            if (subst == null)
-            {
-                subst = A.Fake<IVariablesSubstitution<string>>();
-                A.CallTo(() => subst.Substitute(A<string>.Ignored)).ReturnsLazily((string value) => value);
-            }
-            return new OptionConfigurator(subst);
-        }
+				public string Value { get; set; }
+			}
 
-        [Fact]
-        public void Configure_WhenOptionIsNull_ShouldNotThrow()
-        {
-            var conf = CreateConfigurator();
+			public Dictionary<string, ObjectWithString> Value { get; set; }
+		}
 
-            Action configure = () => conf.Configure<SimpleOption>(null);
+		class OptionWithReadOnlyDictionary
+		{
+			public ReadOnlyDictionary<string, string> Value { get; set; }
+		}
 
-            configure.Should().NotThrow();
-        }
+		IVariablesSubstitution<string> CreateSubst(string value)
+		{
+			var subst = A.Fake<IVariablesSubstitution<string>>();
+			A.CallTo(() => subst.Substitute(A<string>.Ignored)).Returns(value);
 
-        [Fact]
-        public void Configure_WhenOptionHasNullValue_ShouldNotThrow()
-        {
-            var subst = A.Fake<IVariablesSubstitution<string>>();
-            A.CallTo(() => subst.Substitute(A<string>.Ignored)).Throws<NullReferenceException>();
-            var conf = CreateConfigurator(subst);
+			return subst;
+		}
 
-            Action configure = () => conf.Configure<SimpleOption>(new SimpleOption());
+		IOptionConfigurator CreateConfigurator(IVariablesSubstitution<string> subst = null)
+		{
+			if (subst == null)
+			{
+				subst = A.Fake<IVariablesSubstitution<string>>();
+				A.CallTo(() => subst.Substitute(A<string>.Ignored)).ReturnsLazily((string value) => value);
+			}
+			return new OptionConfigurator(subst);
+		}
 
-            configure.Should().NotThrow();
-        }
+		[Fact]
+		public void Configure_WhenOptionIsNull_ShouldNotThrow()
+		{
+			var conf = CreateConfigurator();
 
-        [Fact]
-        public void Configure_WhenOptionHasReadOnlyProperty_ShouldNotThrow()
-        {
-            var subst = A.Fake<IVariablesSubstitution<string>>();
-            A.CallTo(() => subst.Substitute(A<string>.Ignored)).Throws<NullReferenceException>();
-            var conf = CreateConfigurator(subst);
+			Action configure = () => conf.Configure<SimpleOption>(null);
 
-            Action configure = () => conf.Configure(new OptionWithReadOnlyValue());
+			configure.Should().NotThrow();
+		}
 
-            configure.Should().NotThrow();
-        }
+		[Fact]
+		public void Configure_WhenOptionHasNullValue_ShouldNotThrow()
+		{
+			var subst = A.Fake<IVariablesSubstitution<string>>();
+			A.CallTo(() => subst.Substitute(A<string>.Ignored)).Throws<NullReferenceException>();
+			var conf = CreateConfigurator(subst);
 
-        [Fact]
-        public void Configure_WhenOptioNonPublicSettersProperty_ShouldNotSubstituteValue()
-        {
-            var substitutedValue = "SubstitutedValue";
-            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+			Action configure = () => conf.Configure<SimpleOption>(new SimpleOption());
 
-            var originalValue = "OriginalValue";
-            var option = new OptionWithNonPublicSetter(originalValue);
-            conf.Configure(option);
+			configure.Should().NotThrow();
+		}
 
-            option.Value.Should().Be(originalValue);
-        }
+		[Fact]
+		public void Configure_WhenOptionHasReadOnlyProperty_ShouldNotThrow()
+		{
+			var subst = A.Fake<IVariablesSubstitution<string>>();
+			A.CallTo(() => subst.Substitute(A<string>.Ignored)).Throws<NullReferenceException>();
+			var conf = CreateConfigurator(subst);
 
-        [Fact]
-        public void Configure_WhenOptionHasPublicReadWriteProperty_ShouldSubstituteValue()
-        {
-            var substitutedValue = "SubstitutedValue";
-            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+			Action configure = () => conf.Configure(new OptionWithReadOnlyValue());
 
-            var originalValue = "OriginalValue";
-            var option = new SimpleOption() { Value1 = originalValue };
+			configure.Should().NotThrow();
+		}
 
-            conf.Configure(option);
+		[Fact]
+		public void Configure_WhenOptioNonPublicSettersProperty_ShouldNotSubstituteValue()
+		{
+			var substitutedValue = "SubstitutedValue";
+			var conf = CreateConfigurator(CreateSubst(substitutedValue));
 
-            option.Value1.Should().Be(substitutedValue);
-        }
+			var originalValue = "OriginalValue";
+			var option = new OptionWithNonPublicSetter(originalValue);
+			conf.Configure(option);
 
-        [Fact]
-        public void Configure_WhenOptionHasNestedOption_ShouldSubstituteNestedValue()
-        {
-            var substitutedValue = "SubstitutedValue";
-            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+			option.Value.Should().Be(originalValue);
+		}
 
-            var originalValue = "OriginalValue";
-            var option = new OptionWithNestedOptions() { Nested  = new OptionWithNestedOptions.NestedOptions() { Value = originalValue }  };
+		[Fact]
+		public void Configure_WhenOptionHasPublicReadWriteProperty_ShouldSubstituteValue()
+		{
+			var substitutedValue = "SubstitutedValue";
+			var conf = CreateConfigurator(CreateSubst(substitutedValue));
 
-            conf.Configure(option);
+			var originalValue = "OriginalValue";
+			var option = new SimpleOption() { Value1 = originalValue };
 
-            option.Nested.Value.Should().Be(substitutedValue);
-        }
+			conf.Configure(option);
 
-        [Fact]
-        public void Configure_WhenOptionHasStringArrayProperty_ShouldSubstituteAllValues()
-        {
-            var substitutedValue = "SubstitutedValue";
-            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+			option.Value1.Should().Be(substitutedValue);
+		}
 
-            var originalValue1 = "OriginalValue1";
-            var originalValue2 = "OriginalValue2";
-            var option = new StringArrayOption() { Value = new[] { originalValue1, originalValue2 } };
+		[Fact]
+		public void Configure_WhenOptionHasNestedOption_ShouldSubstituteNestedValue()
+		{
+			var substitutedValue = "SubstitutedValue";
+			var conf = CreateConfigurator(CreateSubst(substitutedValue));
 
-            conf.Configure(option);
+			var originalValue = "OriginalValue";
+			var option = new OptionWithNestedOptions() { Nested = new OptionWithNestedOptions.NestedOptions() { Value = originalValue } };
 
-            option.Value[0].Should().Be(substitutedValue);
-            option.Value[1].Should().Be(substitutedValue);
-        }
+			conf.Configure(option);
 
-        [Fact]
-        public void Configure_WhenOptionHasReadOblyStringListProperty_ShouldNotSubstituteValues()
-        {
-            var substitutedValue = "SubstitutedValue";
-            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+			option.Nested.Value.Should().Be(substitutedValue);
+		}
 
-            var option = new ReadOnlyStringListOption();
+		[Fact]
+		public void Configure_WhenOptionHasStringArrayProperty_ShouldSubstituteAllValues()
+		{
+			var substitutedValue = "SubstitutedValue";
+			var conf = CreateConfigurator(CreateSubst(substitutedValue));
 
-            conf.Configure(option);
+			var originalValue1 = "OriginalValue1";
+			var originalValue2 = "OriginalValue2";
+			var option = new StringArrayOption() { Value = new[] { originalValue1, originalValue2 } };
 
-            option.Value[0].Should().NotBe(substitutedValue);
-            option.Value[1].Should().NotBe(substitutedValue);
-        }
+			conf.Configure(option);
 
-        [Fact]
-        public void Configure_WhenStringArrayPropertyHasNullValue_ShouldSubstituteAllNoneNullValues()
-        {
-            var substitutedValue = "SubstitutedValue";
-            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+			option.Value[0].Should().Be(substitutedValue);
+			option.Value[1].Should().Be(substitutedValue);
+		}
 
-            var originalValue1 = "OriginalValue1";
-            var originalValue2 = "OriginalValue2";
-            var option = new StringArrayOption() { Value = new[] { originalValue1, null, originalValue2 } };
+		[Fact]
+		public void Configure_WhenOptionHasReadOnlyStringListProperty_ShouldNotSubstituteValues()
+		{
+			var substitutedValue = "SubstitutedValue";
+			var conf = CreateConfigurator(CreateSubst(substitutedValue));
 
-            conf.Configure(option);
+			var option = new ReadOnlyStringListOption();
 
-            option.Value[0].Should().Be(substitutedValue);
-            option.Value[1].Should().BeNull();
-            option.Value[2].Should().Be(substitutedValue);
-        }
+			conf.Configure(option);
 
-        [Fact]
-        public void Configure_WhenOptionsHasNestedOptionsArrayProperty_ShouldSubstituteAllValuesInTheNestedOptions()
-        {
-            var substitutedValue = "SubstitutedValue";
-            var conf = CreateConfigurator(CreateSubst(substitutedValue));
+			option.Value[0].Should().NotBe(substitutedValue);
+			option.Value[1].Should().NotBe(substitutedValue);
+		}
 
-            var originalValue = "OriginalValue1";
-            var option = new NetstedOptionsListOption() { Value = new[] { new SimpleOption() { Value1 = originalValue } } };
+		[Fact]
+		public void Configure_WhenStringArrayPropertyHasNullValue_ShouldSubstituteAllNoneNullValues()
+		{
+			var substitutedValue = "SubstitutedValue";
+			var conf = CreateConfigurator(CreateSubst(substitutedValue));
 
-            conf.Configure(option);
+			var originalValue1 = "OriginalValue1";
+			var originalValue2 = "OriginalValue2";
+			var option = new StringArrayOption() { Value = new[] { originalValue1, null, originalValue2 } };
 
-            option.Value[0].Value1.Should().Be(substitutedValue);
-        }
-    }
+			conf.Configure(option);
+
+			option.Value[0].Should().Be(substitutedValue);
+			option.Value[1].Should().BeNull();
+			option.Value[2].Should().Be(substitutedValue);
+		}
+
+		[Fact]
+		public void Configure_WhenOptionHasNestedOptionsArrayProperty_ShouldSubstituteAllValuesInTheNestedOptions()
+		{
+			var substitutedValue = "SubstitutedValue";
+			var conf = CreateConfigurator(CreateSubst(substitutedValue));
+
+			var originalValue = "OriginalValue1";
+			var option = new NetstedOptionsListOption() { Value = new[] { new SimpleOption() { Value1 = originalValue } } };
+
+			conf.Configure(option);
+
+			option.Value[0].Value1.Should().Be(substitutedValue);
+		}
+
+		[Fact]
+		public void Configure_WhenOptionHasADictionaryProperty_ShouldSubstituteAllValuesInTheDictionary()
+		{
+			var substitutedValue = "SubstitutedValue";
+			var conf = CreateConfigurator(CreateSubst(substitutedValue));
+
+			var originalValue1 = "OriginalValue1";
+			var originalValue2 = "OriginalValue2";
+			var option = new OptionWithDictionary()
+			{
+				Value = new Dictionary<string, string>
+				{ { "s1", originalValue1}, { "s2", originalValue2 } }
+			};
+
+			conf.Configure(option);
+
+			option.Value["s1"].Should().Be(substitutedValue);
+			option.Value["s2"].Should().Be(substitutedValue);
+		}
+
+		[Fact]
+		public void Configure_WhenOptionHasAReadOnlyDictionaryProperty_ShouldNotSubstituteValuesInTheDictionary()
+		{
+			var substitutedValue = "SubstitutedValue";
+			var conf = CreateConfigurator(CreateSubst(substitutedValue));
+
+			var originalValue1 = "OriginalValue1";
+			var originalValue2 = "OriginalValue2";
+			var option = new OptionWithReadOnlyDictionary()
+			{
+				Value = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>
+				{ { "s1", originalValue1}, { "s2", originalValue2 } })
+			};
+
+			conf.Configure(option);
+
+			option.Value["s1"].Should().Be(originalValue1);
+			option.Value["s2"].Should().Be(originalValue2);
+		}
+
+		[Fact]
+		public void Configure_WhenOptionHasADictionaryPropertyWithObjectValues_ShouldSubstituteValuesInTheDictionary()
+		{
+			var substitutedValue = "SubstitutedValue";
+			var conf = CreateConfigurator(CreateSubst(substitutedValue));
+
+			var originalValue1 = "OriginalValue1";
+			var originalValue2 = "OriginalValue2";
+			var option = new OptionWithDictionaryOfObjects()
+			{
+				Value = new Dictionary<string, OptionWithDictionaryOfObjects.ObjectWithString>
+				{
+					{ "s1", new OptionWithDictionaryOfObjects.ObjectWithString(originalValue1)},
+					{ "s2", new OptionWithDictionaryOfObjects.ObjectWithString(originalValue2) }
+				}
+			};
+
+			conf.Configure(option);
+
+			option.Value["s1"].Value.Should().Be(substitutedValue);
+			option.Value["s2"].Value.Should().Be(substitutedValue);
+		}
+	}
 }
