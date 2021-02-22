@@ -92,7 +92,7 @@ Now you can add a configuration section and use environment variables in your `a
 }
 ```
 
-The substitution works for all nested options including any types of mutable lists. So, this will work too:
+The substitution works for all nested options including any types of mutable lists and dictionaries. So, this will work too:
 
 ```csharp
 public class MyServerOptions
@@ -107,6 +107,7 @@ public class MyServerOptions
     public string[] StringList { get; set; }
     public SubOptions SubOptions { get; set; }
     public List<SubOptions> SubOptionsList { get; set; }
+    public Dictionary<string, string> DictionaryOfStrings { get; set; }
 }
 ```
 
@@ -129,12 +130,14 @@ public class MyServerOptions
             {
                 "Proxy": "%PROXY_ADDRESS%",
             }
-        ]
+        ],
+        "DictionaryOfStrings": {
+            "s1": "%TEMP%/s1",
+            "s2": "%TEMP%/s2"
+        }
     }
 }
 ```
-
-Note: dictionaries are not supported yet, see [Issue #2](https://github.com/drwatson1/configuration-extensions/issues/2).
 
 ### Customization
 
@@ -169,6 +172,7 @@ services.AddOptions<MyServerOptions>()
 
 | Date | Version | Description |
 |-|-|-|
+| 2021-02-22 | 1.2.0 | Support Dictionary<TKey, TValue> of strings and nested options
 | 2020-08-13 | 1.1.0 | Support lists of nested options and strings
 | 2020-07-17 | 1.0.0 | Initial release
 

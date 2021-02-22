@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Product>Configuration Extensions</Product>
     <Authors>Sergey Tregub</Authors>
     <Company>Sergey Tregub</Company>
@@ -12,6 +12,8 @@
     <RepositoryUrl>https://github.com/drwatson1/configuration-extensions</RepositoryUrl>
     <PackageTags>netcore31 options envvars configuration</PackageTags>
     <Description>Automatically expand environment variables in configuration files</Description>
+    <PackageReleaseNotes>Support Dictionary&lt;TKey, TValue&gt; of strings and nested options
+</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
